@@ -1,9 +1,10 @@
 import math
 
+from seed import *
 from crops import *
-from seedMaker import *
+from equipment import *
 from fertilizer import *
-from skills import *
+from professions import *
 
 
 """
@@ -36,12 +37,11 @@ Questions to answer:
 useSeedMaker:bool = False
 
 numberOfCrops:float = 1
-crop = Crops.StarFruit
-growthCycles:float = 1 #toDo: change to growth cycles/regrowth cycles for repeating non-regrowth crops
+crop:Seed = 
+growthCycles:float = 1
 
 farmingLevel:float  = 0
-tiller:bool = False          #toDo: MAKE THIS
-agriculturist:bool = False   #      CLEANER
+professions:list[Profession] = [Professions.Agriculturist]
 
 fertilizer = Fertilizer.none
 speedGro = SpeedGro.none
@@ -71,7 +71,7 @@ percentages = [percentRegular, percentSilver, percentGold, percentIridum]
 # starting with the regular quality crops, then silver, gold, iridium until enough for a replant have
 # been used up
 if useSeedMaker: #toDo: account for not needing to replant
-    seedCropNeeded:float = percentHarvestRequired
+    seedCropNeeded:float = Equipment.SeedMaker.percentHarvestRequired
     for i, p in enumerate(percentages):
         if p >= seedCropNeeded:
             percentages[i] = p - seedCropNeeded
@@ -84,21 +84,21 @@ if useSeedMaker: #toDo: account for not needing to replant
 # then another crop is generated and a new probability is checked to see if more extra
 # crops are produced. The number of crops generated is calculated using expectation of
 # a geometric random variable
-extraYield = 0 if crop.chanceOfMoreCrops == 0 else (1 - crop.chanceOfMoreCrops) / crop.chanceOfMoreCrops
+extraYield = 0 if crop.chanceOfMoreCrops == 0 else crop.chanceOfMoreCrops / (1 - crop.chanceOfMoreCrops)
 
 revenue:float = crop.cropsPerHarvest * sum(percentages[i]*values[i] for i in range(len(percentages))) # Calculate the base value of a single harvest in units of the crop's base value
-revenue += extraYield*regularValue # All extra yields produced by a single crop are of regular quality
-revenue *= numberOfCrops*crop.baseValue # multiply by the base value and the number of crops grown to get the actual value
-revenue *= 1 + (Profession.tiller.value if tiller else 0) # Increase by 10% if the tiller profession is taken
+revenue += extraYield*values[0] # All extra yields produced by a single crop are of regular quality
+revenue *= numberOfCrops*growthCycles*crop.baseValue # multiply by the base value, growthCycles, and number of crops to get the actual value
+revenue *= 1 + (Professions.Tiller.value if Professions.Tiller in professions else 0) # Increase by 10% if the tiller profession is taken
 
 #toDo: post processing
 
 soilCost:float = retainingSoil.price + fertilizer.price + speedGro.price
-capital:float = soilCost + (0 if useSeedMaker else crop.seedCost)
+capital:float = soilCost + (0 if useSeedMaker else crop.seedCost*(1 if crop.daysToRegrow > 0 else growthCycles))
 
-maturationTime:float = math.floor(crop.daysToMature * (1 - speedGro.rate - (Profession.agriculturist.rate if agriculturist else 0)))
-regrowthTime:float = crop.daysToRegrow * growthCycles
-totalTime:float = maturationTime + regrowthTime if crop.regrowth else maturationTime*growthCycles
+maturationTime:float = math.floor(crop.daysToMature * (1 - speedGro.rate - (Professions.Agriculturist.rate if Professions.Agriculturist in professions else 0)))
+regrowthTime:float = crop.daysToRegrow * (growthCycles-1)
+totalTime:float = maturationTime + regrowthTime if crop.daysToRegrow > 0 else maturationTime*growthCycles
 
 profit:float = revenue - capital
 profitPerDay:float = profit/totalTime
