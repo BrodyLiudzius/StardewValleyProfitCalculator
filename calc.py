@@ -37,7 +37,7 @@ Questions to answer:
 useSeedMaker:bool = False
 
 numberOfCrops:float = 1
-crop:Seed = 
+crop:Seed = Seeds.starfruit
 growthCycles:float = 1
 
 farmingLevel:float  = 0
