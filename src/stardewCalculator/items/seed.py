@@ -1,4 +1,5 @@
 import item
+import stardewCalculator.vendors.priceData as sc
 
 class Seed(item.Item):
     def __init__(self, _name: str, _baseValue: float):
@@ -7,4 +8,4 @@ class Seed(item.Item):
     cropsPerHarvest:int
     chanceOfMoreCrops:float
     
-    prices:list[PriceData]
+    prices:list[sc.PriceData]

@@ -1,17 +1,23 @@
 from stardewCalculator.time import Season
-from giantCrop import GiantCrop
 
 #toDo: include crow eating crops
 
 # Growth behavior includes everything before harvest, including time spent as a mature crop
 
 class GrowthBehavior:
-    pass
+    seasons:list[Season]
+    daysToMature:float
+    
+    def Evaluate():
+        pass #toDo
 
 class GrowthBehavior_Default(GrowthBehavior):
-    daysToMature:float
+    def Evaluate():
+        pass #toDo
+
+class GrowthBehavior_Regrowth(GrowthBehavior):
     daysToRegrow:float
 
-    giantCrop:GiantCrop # if left as NoneType, then crop does not grow giant crops
+    def Evaluate():
+        pass #toDo
 
-    seasons:list[Season]
